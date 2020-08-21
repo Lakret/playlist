@@ -1,0 +1,26 @@
+
+.controls-pane {
+  display: flex;
+  justify-content: space-evenly;
+
+  padding: 1rem 0;
+  background-color: rgb(220, 220, 220);
+  box-shadow: 2px 2px 0 0 $shadow-color;
+}
+
+.media-button {
+  width: 8rem;
+  padding: 0 1rem;
+
+  font-family: $main-font-family;
+  font-size: $main-font-size;
+
+  background-color: whitesmoke;
+  border-radius: 4px;
+}
+
+.media-button--disabled {
+  color: gray;
+
+  pointer-events: none;
+}

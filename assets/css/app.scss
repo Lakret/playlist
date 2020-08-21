@@ -1,0 +1,22 @@
+/* This file is for your main application css. */
+@import "./reset.scss";
+@import "./live.scss";
+@import "../node_modules/nprogress/nprogress.css";
+
+@import "./theme.scss";
+@import "./playlist.scss";
+@import "./controls.scss";
+
+body {
+  font-family: $main-font-family;
+  font-size: $main-font-size;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 100vw;
+  height: 100vh;
+}

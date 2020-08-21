@@ -1,0 +1,56 @@
+
+.playlist {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
+
+  width: 50rem;
+  height: 30rem;
+
+  overflow: auto;
+
+  // background-color: violet;
+
+  box-shadow: 2px 2px 0 0 $shadow-color;
+}
+
+.track {
+  display: flex;
+  flex-direction: row;
+
+  border-bottom: 1px solid lightgray;
+}
+
+.track--playing {
+  background-color: lightgray;
+}
+
+.track__field {
+  padding: 1rem;
+}
+
+.track__play {
+  font-size: 1.5rem;
+  font-weight: 800;
+
+  // border: 1px solid black;
+  // border-radius: 20rem;
+}
+
+.track__title {
+  width: 20rem;
+
+  // background-color: lightyellow;
+  // border: 1px solid black;
+}
+
+.track__artist {
+  width: 10rem;
+  // background-color: pink;
+}
+
+.track__album {
+  width: 10rem;
+  // background-color: lightseagreen;
+}

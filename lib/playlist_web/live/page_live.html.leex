@@ -1,0 +1,54 @@
+<div class="playlist">
+  <%= for {track, track_idx} <- Enum.with_index(@queue) do %>
+
+  <%
+    track_class = if track_idx == @playing_idx, do: "track track--playing", else: "track"
+  %>
+
+  <div class="<%= track_class %>">
+    <div class="track__field track__play"
+         phx-click="play_this" phx-value-track-idx="<%= track_idx %>">
+      >
+    </div>
+    <div class="track__field track__title">
+      <%= track.title %>
+    </div>
+    <div class="track__field track__artist">
+      <%= track.artist %>
+    </div>
+    <div class="track__field track__album">
+      <%= track.album %>
+    </div>
+  </div>
+
+  <% end %>
+</div>
+
+<div class="controls-pane">
+  <%
+    aux_button_class =
+      if @playing_idx do
+        "media-button"
+      else
+        "media-button media-button--disabled"
+      end
+  %>
+
+  <button class="<%= aux_button_class %>"
+          phx-click="previous">
+    Previous
+  </button>
+
+  <button class="media-button"
+          phx-click="play_or_pause">
+    <%= case @playing_idx do
+      nil -> "Play"
+      idx when is_integer(idx) -> "Pause"
+    end %>
+  </button>
+
+  <button class="<%= aux_button_class %>"
+          phx-click="next">
+    Next
+  </button>
+</div>
