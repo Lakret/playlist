@@ -1,0 +1,20 @@
+
+.track-position {
+  width: 80%;
+  height: 0.5rem;
+
+  background-color: $track-position-background;
+
+  cursor: pointer;
+}
+
+.track-position--disabled {
+  background-color: $disabled-color;
+}
+
+.track-position__filler {
+  // width: 70%;
+  height: 100%;
+
+  background-color: $track-position-filler;
+}

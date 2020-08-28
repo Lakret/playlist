@@ -1,14 +1,19 @@
+<%
+  import PlaylistWeb.PageView
+  alias PlaylistWeb.PageLive.State
+%>
+
 <div class="playlist">
-  <%= for {track, track_idx} <- Enum.with_index(@queue) do %>
+  <%= for {track, track_idx} <- Enum.with_index(@state.queue) do %>
 
   <%
-    track_class = if track_idx == @playing_idx, do: "track track--playing", else: "track"
+    track_class = if track_idx == @state.playing_idx, do: "track track--playing", else: "track"
   %>
 
   <div class="<%= track_class %>">
     <div class="track__field track__play"
          phx-click="play_this" phx-value-track-idx="<%= track_idx %>">
-      >
+      <i class="fas fa-play"></i>
     </div>
     <div class="track__field track__title">
       <%= track.title %>
@@ -19,6 +24,9 @@
     <div class="track__field track__album">
       <%= track.album %>
     </div>
+    <div class="track__field track__length">
+      <%= pretty_time(track.length) %>
+    </div>
   </div>
 
   <% end %>
@@ -26,29 +34,58 @@
 
 <div class="controls-pane">
   <%
+    current_track = State.get_playing_track(@state)
+
     aux_button_class =
-      if @playing_idx do
+      if @state.playing_idx do
         "media-button"
       else
         "media-button media-button--disabled"
       end
   %>
 
-  <button class="<%= aux_button_class %>"
-          phx-click="previous">
-    Previous
-  </button>
+  <div class="controls-pane__buttons">
+    <div class="controls-pane__small_button_container">
+      <div class="<%= aux_button_class %>"
+              phx-click="previous">
+        <i class="fas fa-backward"></i>
+      </div>
+    </div>
 
-  <button class="media-button"
-          phx-click="play_or_pause">
-    <%= case @playing_idx do
-      nil -> "Play"
-      idx when is_integer(idx) -> "Pause"
-    end %>
-  </button>
+    <div class="media-button media-button--large"
+            phx-click="play_or_pause">
+      <%= if @state.playing_idx do %>
+        <i class="fas fa-play fa-2x"></i>
+      <% else %>
+        <i class="fas fa-pause fa-2x"></i>
+      <% end %>
+    </div>
 
-  <button class="<%= aux_button_class %>"
+    <div class="controls-pane__small_button_container">
+      <div class="<%= aux_button_class %>"
           phx-click="next">
-    Next
-  </button>
+        <i class="fas fa-forward"></i>
+      </div>
+    </div>
+  </div>
+
+  <%
+    {play_position, track_position_class, filler_style} =
+      if State.playing?(@state) do
+        play_position = State.get_play_position(@state) |> pretty_time()
+        length_percentage = State.get_play_position_percentage(@state)
+
+        {play_position, "track-position", "width: #{length_percentage}%;"}
+      else
+        {"0:00", "track-position track-position--disabled", "width: 0;"}
+      end
+  %>
+
+  <div class="controls-pane__track_position">
+    <span>0:00</span>
+    <div class="<%= track_position_class %>">
+      <div class="track-position__filler" style="<%= filler_style %>"></div>
+    </div>
+    <span><%= play_position %></span>
+  </div>
 </div>

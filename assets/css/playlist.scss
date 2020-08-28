@@ -5,12 +5,10 @@
   justify-content: start;
   align-items: center;
 
-  width: 50rem;
+  width: 55rem;
   height: 30rem;
 
   overflow: auto;
-
-  // background-color: violet;
 
   box-shadow: 2px 2px 0 0 $shadow-color;
 }
@@ -53,4 +51,11 @@
 .track__album {
   width: 10rem;
   // background-color: lightseagreen;
+}
+
+.track__length {
+  width: 7rem;
+
+  display: flex;
+  justify-content: flex-end;
 }

@@ -1,22 +1,54 @@
 
 .controls-pane {
   display: flex;
-  justify-content: space-evenly;
+  flex-direction: column;
+  align-items: center;
 
   padding: 1rem 0;
   background-color: rgb(220, 220, 220);
   box-shadow: 2px 2px 0 0 $shadow-color;
 }
 
+.controls-pane__buttons {
+  display: flex;
+  justify-content: space-evenly;
+
+  width: 100%;
+}
+
+.controls-pane__track_position {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  width: 80%;
+  padding: 0.5rem 0;
+}
+
+.controls-pane__small_button_container {
+  display: flex;
+  align-items: center;
+}
+
 .media-button {
-  width: 8rem;
-  padding: 0 1rem;
+  width: 3rem;
+  padding: 0.5rem 0.5rem;
+  border-radius: 10rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   font-family: $main-font-family;
   font-size: $main-font-size;
 
   background-color: whitesmoke;
-  border-radius: 4px;
+}
+
+.media-button--large {
+  width: 6rem;
+  padding: 1rem 1rem;
+  border-radius: 20rem;
 }
 
 .media-button--disabled {

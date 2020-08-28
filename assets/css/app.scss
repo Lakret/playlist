@@ -6,6 +6,7 @@
 @import "./theme.scss";
 @import "./playlist.scss";
 @import "./controls.scss";
+@import "./track_position.scss";
 
 body {
   font-family: $main-font-family;
@@ -15,8 +16,9 @@ body {
 .container {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 
+  padding-top: 5rem;
   width: 100vw;
   height: 100vh;
 }
