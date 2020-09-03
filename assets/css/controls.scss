@@ -21,8 +21,14 @@
   justify-content: space-between;
   align-items: center;
 
-  width: 80%;
+  width: 85%;
   padding: 0.5rem 0;
+}
+
+.controls-pane__track_position_time {
+  width: 6rem;
+
+  text-align: center;
 }
 
 .controls-pane__small_button_container {

@@ -3,14 +3,15 @@
   alias PlaylistWeb.PageLive.State
 %>
 
-<div class="playlist">
+<div phx-hook="ScrollToTrack" id="playlist" class="playlist">
   <%= for {track, track_idx} <- Enum.with_index(@state.queue) do %>
 
   <%
+    track_id = "track_" <> to_string(track_idx)
     track_class = if track_idx == @state.playing_idx, do: "track track--playing", else: "track"
   %>
 
-  <div class="<%= track_class %>">
+  <div id="<%= track_id %>" class="<%= track_class %>">
     <div class="track__field track__play"
          phx-click="play_this" phx-value-track-idx="<%= track_idx %>">
       <i class="fas fa-play"></i>
@@ -34,8 +35,6 @@
 
 <div class="controls-pane">
   <%
-    current_track = State.get_playing_track(@state)
-
     aux_button_class =
       if @state.playing_idx do
         "media-button"
@@ -84,10 +83,10 @@
   %>
 
   <div class="controls-pane__track_position">
-    <span><%= play_position %></span>
+    <span class="controls-pane__track_position_time"><%= play_position %></span>
     <div class="<%= track_position_class %>" phx-click="scrub">
       <div class="track-position__filler" style="<%= filler_style %>"></div>
     </div>
-    <span><%= track_length %></span>
+    <span class="controls-pane__track_position_time"><%= track_length %></span>
   </div>
 </div>

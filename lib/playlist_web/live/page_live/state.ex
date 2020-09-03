@@ -112,7 +112,7 @@ defmodule PlaylistWeb.PageLive.State do
 
   Does nothing if nothing is playing.
   """
-  @spec set_play_position(t(), non_neg_integer()) :: t()
+  @spec set_play_position(t(), float()) :: t()
   def set_play_position(%__MODULE__{} = state, track_position_percentage) do
     case get_playing_track(state) do
       nil ->
@@ -154,6 +154,13 @@ defmodule PlaylistWeb.PageLive.State do
       when is_integer(idx) do
     Enum.at(state.queue, idx)
   end
+
+  @doc """
+  Returns the index of the currently playing track in the queue,
+  or `nil` if nothing is playing.
+  """
+  @spec get_playing_track_idx(t()) :: non_neg_integer() | nil
+  def get_playing_track_idx(%__MODULE__{playing_idx: idx}), do: idx
 
   @doc """
   Returns the paused track, or `nil`.
@@ -218,14 +225,15 @@ defmodule PlaylistWeb.PageLive.State do
   Play a track by its `index` in the queue in `state`.
   """
   @spec play_by_index(t(), non_neg_integer()) :: t()
-  def play_by_index(%__MODULE__{} = state, index) when is_integer(index) and index > 0 do
+  def play_by_index(%__MODULE__{} = state, index) when is_integer(index) and index >= 0 do
     %{state | playing_idx: index, play_position_secs: 0}
   end
 
   @doc """
   Plays the next track in queue in `state`.
-
   If nothing is playing, starts the playback.
+
+  Returns the new state.
   """
   @spec play_next(t()) :: t()
   def play_next(%__MODULE__{} = state) do
