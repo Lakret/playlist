@@ -64,4 +64,13 @@ defmodule PlaylistWeb.PageLive do
     state = State.play_next(socket.assigns.state)
     {:noreply, assign(socket, state: state)}
   end
+
+  def handle_event("scrub", params, socket) do
+    position_control_length = params["elementMaxX"] - params["elementMinX"]
+    normalized_click_position = params["clientX"] - params["elementMinX"]
+    track_position_percentage = normalized_click_position / position_control_length
+
+    state = State.set_play_position(socket.assigns.state, track_position_percentage)
+    {:noreply, assign(socket, state: state)}
+  end
 end

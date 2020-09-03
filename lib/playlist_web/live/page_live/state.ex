@@ -20,7 +20,7 @@ defmodule PlaylistWeb.PageLive.State do
   If the length of the current track is exceeded,
   starts the playback of the next track in `state`'s queue.
 
-  Does nothing is nothing is playing.
+  Does nothing if nothing is playing.
   """
   @spec advance_play_position(t(), non_neg_integer()) :: t()
   def advance_play_position(state, seconds \\ 1) do
@@ -84,6 +84,59 @@ defmodule PlaylistWeb.PageLive.State do
   end
 
   @doc """
+  Get the length of the currently playing track,
+  or, if not playing, the length of the paused track.
+
+  If there is no paused track, returns 0 seconds.
+  """
+  @spec get_playing_or_paused_track_length(t()) :: Time.t()
+  def get_playing_or_paused_track_length(%__MODULE__{} = state) do
+    case get_playing_track(state) do
+      nil ->
+        case get_paused_track(state) do
+          nil -> ~T[00:00:00]
+          %Track{length: length} -> length
+        end
+
+      %Track{length: length} ->
+        length
+    end
+  end
+
+  @doc """
+  Sets play position of the current playing track
+  to the specified `track_position_percentage` (should be between 0 and 1).
+
+  If the length of the current track is exceeded,
+  starts the playback of the next track in `state`'s queue.
+
+  Does nothing if nothing is playing.
+  """
+  @spec set_play_position(t(), non_neg_integer()) :: t()
+  def set_play_position(%__MODULE__{} = state, track_position_percentage) do
+    case get_playing_track(state) do
+      nil ->
+        state
+
+      %Track{length: length} ->
+        length_seconds = length |> Time.to_erl() |> :calendar.time_to_seconds()
+
+        new_play_position_secs = round(length_seconds * track_position_percentage)
+
+        play_position_time =
+          new_play_position_secs
+          |> :calendar.seconds_to_time()
+          |> Time.from_erl!()
+
+        if Time.compare(play_position_time, length) == :gt do
+          play_next(state)
+        else
+          %{state | play_position_secs: new_play_position_secs}
+        end
+    end
+  end
+
+  @doc """
   Checks if the `state` is in playback mode.
   """
   @spec playing?(t()) :: boolean()
@@ -98,6 +151,19 @@ defmodule PlaylistWeb.PageLive.State do
   def get_playing_track(%__MODULE__{playing_idx: nil}), do: nil
 
   def get_playing_track(%__MODULE__{playing_idx: idx} = state)
+      when is_integer(idx) do
+    Enum.at(state.queue, idx)
+  end
+
+  @doc """
+  Returns the paused track, or `nil`.
+  """
+  @spec get_playing_track(t()) :: Track | nil
+  def get_paused_track(state)
+
+  def get_paused_track(%__MODULE__{paused_idx: nil}), do: nil
+
+  def get_paused_track(%__MODULE__{paused_idx: idx} = state)
       when is_integer(idx) do
     Enum.at(state.queue, idx)
   end

@@ -70,6 +70,8 @@
   </div>
 
   <%
+    track_length = State.get_playing_or_paused_track_length(@state) |> pretty_time()
+
     {play_position, track_position_class, filler_style} =
       if State.playing?(@state) do
         play_position = State.get_play_position(@state) |> pretty_time()
@@ -82,10 +84,10 @@
   %>
 
   <div class="controls-pane__track_position">
-    <span>0:00</span>
-    <div class="<%= track_position_class %>">
+    <span><%= play_position %></span>
+    <div class="<%= track_position_class %>" phx-click="scrub">
       <div class="track-position__filler" style="<%= filler_style %>"></div>
     </div>
-    <span><%= play_position %></span>
+    <span><%= track_length %></span>
   </div>
 </div>

@@ -13,12 +13,32 @@ import "../css/app.scss"
 //     import socket from "./socket"
 //
 import "phoenix_html"
-import {Socket} from "phoenix"
+import { Socket } from "phoenix"
 import NProgress from "nprogress"
-import {LiveSocket} from "phoenix_live_view"
+import { LiveSocket } from "phoenix_live_view"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}})
+let liveSocket = new LiveSocket("/live", Socket, {
+  params: { _csrf_token: csrfToken },
+  metadata: {
+    click: (e, el) => {
+      let elementRect = el.getBoundingClientRect();
+      let elementMinX = elementRect.x;
+      let elementMaxX = elementRect.x + elementRect.width;
+      let elementMinY = elementRect.y;
+      let elementMaxY = elementRect.y + elementRect.height;
+
+      return {
+        clientX: e.clientX,
+        clientY: e.clientY,
+        elementMinX: elementMinX,
+        elementMaxX: elementMaxX,
+        elementMinY: elementMinY,
+        elementMaxY: elementMaxY,
+      }
+    }
+  }
+})
 
 // Show progress bar on live navigation and form submits
 window.addEventListener("phx:page-loading-start", info => NProgress.start())
@@ -32,4 +52,3 @@ liveSocket.connect()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
-
