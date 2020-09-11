@@ -4,14 +4,13 @@ defmodule PlaylistWeb.PageLive.State do
   """
   alias PlaylistWeb.PageLive.Track
 
-  defstruct ~w(playing_idx play_position_secs paused_idx queue grouping)a
+  defstruct ~w(playing_idx play_position_secs paused_idx queue)a
 
   @type t :: %__MODULE__{
           playing_idx: non_neg_integer() | nil,
           play_position_secs: non_neg_integer() | nil,
           paused_idx: non_neg_integer() | nil,
-          queue: [Track.t()],
-          grouping: :album | nil
+          queue: [Track.t()]
         }
 
   @doc """
@@ -260,6 +259,38 @@ defmodule PlaylistWeb.PageLive.State do
       %{state | playing_idx: playing_idx, play_position_secs: 0}
     else
       play(state)
+    end
+  end
+
+  @doc """
+  Removes the track at index `track_idx` from the queue in `state`.
+
+  Handles moving playback in case the currently playing track was removed.
+  Note, that removing a track will change indices of the following tracks.
+  """
+  @spec remove_track_by_idx(t(), track_idx :: non_neg_integer()) :: t()
+  def remove_track_by_idx(%__MODULE__{} = state, track_idx) do
+    queue = List.delete_at(state.queue, track_idx)
+
+    case get_playing_track_idx(state) do
+      nil ->
+        %{state | queue: queue}
+
+      playing_idx ->
+        cond do
+          playing_idx == track_idx ->
+            playing_idx = min(playing_idx, length(queue) - 1)
+
+            %{state | queue: queue, playing_idx: playing_idx, play_position_secs: 0}
+
+          playing_idx < track_idx ->
+            %{state | queue: queue}
+
+          playing_idx > track_idx ->
+            playing_idx = max(playing_idx - 1, 0)
+
+            %{state | queue: queue, playing_idx: playing_idx}
+        end
     end
   end
 end

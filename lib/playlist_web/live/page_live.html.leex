@@ -7,11 +7,22 @@
 
 <div class="header">
   <%
-    no_groups_button_class = if is_nil(@state.grouping), do: "radio-group__button radio-group__button--selected", else: "radio-group__button"
-    album_button_class = if @state.grouping == :album, do: "radio-group__button radio-group__button--selected", else: "radio-group__button"
+    no_groups_button_class = if is_nil(@grouping), do: "radio-group__button radio-group__button--selected", else: "radio-group__button"
+    album_button_class = if @grouping == :album, do: "radio-group__button radio-group__button--selected", else: "radio-group__button"
+
+    selection_text =
+      case @selection do
+        nil -> ""
+        {:track, track_idx} -> "Track ##{track_idx} selected."
+        {:album, album_idx, min_track_idx, max_track_idx} -> "Album ##{album_idx} (tracks ##{min_track_idx}..##{max_track_idx}) selected."
+      end
   %>
 
-  <div class="radio-group">
+  <div class="header__left">
+    <p class="header__selection_state"><%= selection_text %></p>
+  </div>
+
+  <div class="header__right radio-group">
     <div phx-click="change_grouping" phx-value-grouping="nil" class="<%= no_groups_button_class %>">
       No Groups
     </div>
@@ -22,9 +33,10 @@
   </div>
 </div>
 
-<div phx-hook="ScrollToTrack" id="playlist" class="playlist">
+<div phx-hook="ScrollToTrack" id="playlist" class="playlist"
+     phx-window-keyup="window_keyup">
   <!-- Grouped by Album view -->
-  <%= if @state.grouping == :album do %>
+  <%= if @grouping == :album do %>
     <%
       {grouped_queue, current_group, current_artist_and_album} =
         Enum.with_index(@state.queue)
@@ -49,27 +61,51 @@
 
       previous_group = Enum.reverse(current_group)
       grouped_queue = [{current_artist_and_album, previous_group} | grouped_queue]
-      grouped_queue = Enum.reverse(grouped_queue)
+
+      grouped_queue =
+        Enum.reverse(grouped_queue)
+        |> Enum.with_index()
+        |> Enum.map(fn {{{artist, album}, tracks}, album_idx} ->
+          {{album_idx, artist, album}, tracks}
+        end)
     %>
 
-    <div>
-      <%= for {{artist, album}, tracks_in_group} <- grouped_queue do %>
-        <div class="playlist__group_header">
+    <%= for {{album_idx, artist, album}, tracks_in_group} <- grouped_queue do %>
+      <%
+        track_indices = Enum.map(tracks_in_group, fn {idx, _track} -> idx end)
+        {min_track_idx, max_track_idx} = {Enum.min(track_indices), Enum.max(track_indices)}
+
+        playlist_group_class =
+          case @selection do
+            {:album, ^album_idx, _, _} -> "playlist__group playlist__group--selected"
+            _ -> "playlist__group"
+          end
+      %>
+
+      <div class="<%= playlist_group_class %>">
+        <div class="playlist__group_header"
+            phx-click="select_this_album" phx-value-album-idx="<%= album_idx %>"
+            phx-value-min-track-idx="<%= min_track_idx %>"
+            phx-value-max-track-idx="<%= max_track_idx %>">
           <span><%= artist %> — <%= album %></span>
         </div>
 
         <%= for {track_idx, track} <- tracks_in_group do %>
           <%= render PageView, "track.html", track: track, track_idx: track_idx,
-                                             playing_idx: @state.playing_idx %>
+                                            playing_idx: @state.playing_idx,
+                                            selection: @selection,
+                                            show_album_selection_on_tracks: false %>
         <% end %>
-      <% end %>
-    </div>
+      </div>
+    <% end %>
 
   <!-- No Grouping view -->
   <% else %>
     <%= for {track, track_idx} <- Enum.with_index(@state.queue) do %>
       <%= render PageView, "track.html", track: track, track_idx: track_idx,
-                                         playing_idx: @state.playing_idx %>
+                                         playing_idx: @state.playing_idx,
+                                         selection: @selection,
+                                         show_album_selection_on_tracks: true %>
     <% end %>
   <% end %>
 </div>

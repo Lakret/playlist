@@ -1,22 +1,42 @@
 <%
   track_id = "track_" <> to_string(@track_idx)
+
   track_class = if @track_idx == @playing_idx, do: "track track--playing", else: "track"
+  track_class =
+    case @selection do
+      {:track, selected_track_idx} ->
+        if selected_track_idx == @track_idx do
+          "#{track_class} track--selected"
+        else
+          track_class
+        end
+
+      {:album, _album_idx, min_selected_track_idx, max_selected_track_idx} ->
+        if @show_album_selection_on_tracks &&  @track_idx >= min_selected_track_idx && @track_idx <= max_selected_track_idx do
+          "#{track_class} track--selected"
+        else
+          track_class
+        end
+
+      _ ->
+        track_class
+    end
 %>
 
 <div id="<%= track_id %>" class="<%= track_class %>">
   <div class="track__field track__play" phx-click="play_this" phx-value-track-idx="<%= @track_idx %>">
     <i class="fas fa-play"></i>
   </div>
-  <div class="track__field track__title">
+  <div class="track__field track__title" phx-click="select_this" phx-value-track-idx="<%= @track_idx %>">
     <%= @track.title %>
   </div>
-  <div class="track__field track__artist">
+  <div class="track__field track__artist" phx-click="select_this" phx-value-track-idx="<%= @track_idx %>">
     <%= @track.artist %>
   </div>
-  <div class="track__field track__album">
+  <div class="track__field track__album" phx-click="select_this" phx-value-track-idx="<%= @track_idx %>">
     <%= @track.album %>
   </div>
-  <div class="track__field track__length">
+  <div class="track__field track__length" phx-click="select_this" phx-value-track-idx="<%= @track_idx %>">
     <%= pretty_time(@track.length) %>
   </div>
 </div>

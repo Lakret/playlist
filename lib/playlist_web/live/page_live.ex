@@ -6,7 +6,11 @@ defmodule PlaylistWeb.PageLive do
   @impl true
   def mount(_params, _session, socket) do
     state = init_state()
-    state = %{state | queue: List.duplicate(state.queue, 10) |> List.flatten(), grouping: :album}
+
+    state = %{
+      state
+      | queue: List.duplicate(state.queue, 10) |> List.flatten()
+    }
 
     if connected?(socket) do
       :timer.send_interval(1000, :tick)
@@ -25,7 +29,13 @@ defmodule PlaylistWeb.PageLive do
         # and the current `tick_count`.
         scroll_to_playing_track: true,
         tick_count: 0,
-        play_selected_last_tick: 0
+        play_selected_last_tick: 0,
+        # View / UI state
+        # can be `nil`, or `:album`
+        grouping: :album,
+        # can be `nil`, `{:track, track_idx}`,
+        # or `{:album, album_idx, min_track_idx, max_track_idx}`
+        selection: nil
       )
 
     {:ok, socket}
@@ -156,15 +166,49 @@ defmodule PlaylistWeb.PageLive do
   def handle_event("change_grouping", %{"grouping" => grouping}, socket) do
     grouping = String.to_existing_atom(grouping)
 
-    if grouping != socket.assigns.state.grouping do
+    if grouping != socket.assigns.grouping do
       socket =
-        assign(socket, state: %{socket.assigns.state | grouping: grouping})
+        assign(socket, grouping: grouping)
         |> push_playing_track_scroll_event()
 
       {:noreply, socket}
     else
       {:noreply, socket}
     end
+  end
+
+  def handle_event("select_this", %{"track-idx" => track_idx}, socket) do
+    {track_idx, ""} = Integer.parse(track_idx)
+    socket = assign(socket, selection: {:track, track_idx})
+
+    {:noreply, socket}
+  end
+
+  def handle_event(
+        "select_this_album",
+        %{
+          "album-idx" => album_idx,
+          "min-track-idx" => min_track_idx,
+          "max-track-idx" => max_track_idx
+        },
+        socket
+      ) do
+    {album_idx, ""} = Integer.parse(album_idx)
+    {min_track_idx, ""} = Integer.parse(min_track_idx)
+    {max_track_idx, ""} = Integer.parse(max_track_idx)
+
+    socket = assign(socket, selection: {:album, album_idx, min_track_idx, max_track_idx})
+    {:noreply, socket}
+  end
+
+  def handle_event("window_keyup", %{"key" => key}, socket) do
+    socket =
+      case key do
+        "Delete" -> remove_selection(socket)
+        _ -> socket
+      end
+
+    {:noreply, socket}
   end
 
   ## Helpers
@@ -183,9 +227,28 @@ defmodule PlaylistWeb.PageLive do
 
   # Unconditionally pushes `scroll_to_playing_track` event to client JS.
   @spec push_playing_track_scroll_event_if_needed(Socket.t()) :: Socket.t()
-  def push_playing_track_scroll_event(socket) do
+  defp push_playing_track_scroll_event(socket) do
     playing_track_idx = State.get_playing_track_idx(socket.assigns.state)
 
     push_event(socket, "scroll_to_playing_track", %{track_idx: playing_track_idx})
+  end
+
+  @spec remove_selection(Socket.t()) :: Socket.t()
+  defp remove_selection(socket) do
+    state =
+      case socket.assigns.selection do
+        nil ->
+          socket.assigns.state
+
+        {:track, track_idx} ->
+          State.remove_track_by_idx(socket.assigns.state, track_idx)
+
+        {:album, _album_idx, min_track_idx, max_track_idx} ->
+          Enum.reduce(min_track_idx..max_track_idx, socket.assigns.state, fn _track_idx, state ->
+            State.remove_track_by_idx(state, min_track_idx)
+          end)
+      end
+
+    assign(socket, state: state, selection: nil)
   end
 end

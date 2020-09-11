@@ -26,10 +26,22 @@ body {
 
 .header {
   display: flex;
-  justify-content: flex-end;
   align-items: center;
+  justify-content: space-between;
 
   width: $header-width;
 
   background-color: $color-blue;
+}
+
+.header__left {
+  justify-self: flex-start;
+}
+
+.header__right {
+  justify-self: flex-end;
+}
+
+.header__selection_state {
+  padding: 0 1rem;
 }
