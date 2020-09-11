@@ -1,64 +1,22 @@
 
-.controls-pane {
+.radio-group {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  padding: 1rem 0;
-  background-color: rgb(220, 220, 220);
-  box-shadow: 2px 2px 0 0 $shadow-color;
-}
-
-.controls-pane__buttons {
-  display: flex;
-  justify-content: space-evenly;
-
-  width: 100%;
-}
-
-.controls-pane__track_position {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  width: 85%;
-  padding: 0.5rem 0;
-}
-
-.controls-pane__track_position_time {
-  width: 6rem;
-
-  text-align: center;
-}
-
-.controls-pane__small_button_container {
-  display: flex;
-  align-items: center;
-}
-
-.media-button {
-  width: 3rem;
-  padding: 0.5rem 0.5rem;
-  border-radius: 10rem;
-
-  display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 
-  font-family: $main-font-family;
-  font-size: $main-font-size;
-
-  background-color: whitesmoke;
+  background-color: inherit;
 }
 
-.media-button--large {
-  width: 6rem;
-  padding: 1rem 1rem;
-  border-radius: 20rem;
+.radio-group__button {
+  padding: 0.5rem;
+
+  cursor: pointer;
 }
 
-.media-button--disabled {
-  color: gray;
+.radio-group__button:hover {
+  background-color: darken($color-orange, 20%);
+}
 
-  pointer-events: none;
+.radio-group__button--selected {
+  background-color: $color-orange;
 }

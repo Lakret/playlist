@@ -1,35 +1,76 @@
 <%
   import PlaylistWeb.PageView
+
+  alias PlaylistWeb.PageView
   alias PlaylistWeb.PageLive.State
 %>
 
-<div phx-hook="ScrollToTrack" id="playlist" class="playlist">
-  <%= for {track, track_idx} <- Enum.with_index(@state.queue) do %>
-
+<div class="header">
   <%
-    track_id = "track_" <> to_string(track_idx)
-    track_class = if track_idx == @state.playing_idx, do: "track track--playing", else: "track"
+    no_groups_button_class = if is_nil(@state.grouping), do: "radio-group__button radio-group__button--selected", else: "radio-group__button"
+    album_button_class = if @state.grouping == :album, do: "radio-group__button radio-group__button--selected", else: "radio-group__button"
   %>
 
-  <div id="<%= track_id %>" class="<%= track_class %>">
-    <div class="track__field track__play"
-         phx-click="play_this" phx-value-track-idx="<%= track_idx %>">
-      <i class="fas fa-play"></i>
+  <div class="radio-group">
+    <div phx-click="change_grouping" phx-value-grouping="nil" class="<%= no_groups_button_class %>">
+      No Groups
     </div>
-    <div class="track__field track__title">
-      <%= track.title %>
-    </div>
-    <div class="track__field track__artist">
-      <%= track.artist %>
-    </div>
-    <div class="track__field track__album">
-      <%= track.album %>
-    </div>
-    <div class="track__field track__length">
-      <%= pretty_time(track.length) %>
+
+    <div phx-click="change_grouping" phx-value-grouping="album" class="<%= album_button_class %>">
+      By Album
     </div>
   </div>
+</div>
 
+<div phx-hook="ScrollToTrack" id="playlist" class="playlist">
+  <!-- Grouped by Album view -->
+  <%= if @state.grouping == :album do %>
+    <%
+      {grouped_queue, current_group, current_artist_and_album} =
+        Enum.with_index(@state.queue)
+        |> Enum.reduce(
+          {[], [], nil},
+          fn {track, track_idx}, {queue, current_group, current_artist_and_album} ->
+            case current_artist_and_album do
+              nil ->
+                {queue, [{track_idx, track}], {track.artist, track.album}}
+
+              {current_artist, current_album} ->
+                if current_artist == track.artist &&  current_album == track.album do
+                  {queue, [{track_idx, track} | current_group], current_artist_and_album}
+                else
+                  previous_group = Enum.reverse(current_group)
+                  queue = [{current_artist_and_album, previous_group} | queue]
+
+                  {queue, [{track_idx, track}], {track.artist, track.album}}
+                end
+            end
+          end)
+
+      previous_group = Enum.reverse(current_group)
+      grouped_queue = [{current_artist_and_album, previous_group} | grouped_queue]
+      grouped_queue = Enum.reverse(grouped_queue)
+    %>
+
+    <div>
+      <%= for {{artist, album}, tracks_in_group} <- grouped_queue do %>
+        <div class="playlist__group_header">
+          <span><%= artist %> — <%= album %></span>
+        </div>
+
+        <%= for {track_idx, track} <- tracks_in_group do %>
+          <%= render PageView, "track.html", track: track, track_idx: track_idx,
+                                             playing_idx: @state.playing_idx %>
+        <% end %>
+      <% end %>
+    </div>
+
+  <!-- No Grouping view -->
+  <% else %>
+    <%= for {track, track_idx} <- Enum.with_index(@state.queue) do %>
+      <%= render PageView, "track.html", track: track, track_idx: track_idx,
+                                         playing_idx: @state.playing_idx %>
+    <% end %>
   <% end %>
 </div>
 
@@ -45,24 +86,21 @@
 
   <div class="controls-pane__buttons">
     <div class="controls-pane__small_button_container">
-      <div class="<%= aux_button_class %>"
-              phx-click="previous">
+      <div class="<%= aux_button_class %>" phx-click="previous">
         <i class="fas fa-backward"></i>
       </div>
     </div>
 
-    <div class="media-button media-button--large"
-            phx-click="play_or_pause">
+    <div class="media-button media-button--large" phx-click="play_or_pause">
       <%= if @state.playing_idx do %>
-        <i class="fas fa-play fa-2x"></i>
+      <i class="fas fa-play fa-2x"></i>
       <% else %>
-        <i class="fas fa-pause fa-2x"></i>
+      <i class="fas fa-pause fa-2x"></i>
       <% end %>
     </div>
 
     <div class="controls-pane__small_button_container">
-      <div class="<%= aux_button_class %>"
-          phx-click="next">
+      <div class="<%= aux_button_class %>" phx-click="next">
         <i class="fas fa-forward"></i>
       </div>
     </div>

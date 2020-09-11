@@ -6,7 +6,7 @@ defmodule PlaylistWeb.PageLive do
   @impl true
   def mount(_params, _session, socket) do
     state = init_state()
-    state = %{state | queue: List.duplicate(state.queue, 10) |> List.flatten()}
+    state = %{state | queue: List.duplicate(state.queue, 10) |> List.flatten(), grouping: :album}
 
     if connected?(socket) do
       :timer.send_interval(1000, :tick)
@@ -153,6 +153,20 @@ defmodule PlaylistWeb.PageLive do
     {:noreply, assign(socket, state: state)}
   end
 
+  def handle_event("change_grouping", %{"grouping" => grouping}, socket) do
+    grouping = String.to_existing_atom(grouping)
+
+    if grouping != socket.assigns.state.grouping do
+      socket =
+        assign(socket, state: %{socket.assigns.state | grouping: grouping})
+        |> push_playing_track_scroll_event()
+
+      {:noreply, socket}
+    else
+      {:noreply, socket}
+    end
+  end
+
   ## Helpers
 
   # Pushes `scroll_to_playing_track` event to client JS if user
@@ -161,11 +175,17 @@ defmodule PlaylistWeb.PageLive do
   @spec push_playing_track_scroll_event_if_needed(Socket.t()) :: Socket.t()
   defp push_playing_track_scroll_event_if_needed(socket) do
     if socket.assigns.scroll_to_playing_track do
-      playing_track_idx = State.get_playing_track_idx(socket.assigns.state)
-
-      push_event(socket, "scroll_to_playing_track", %{track_idx: playing_track_idx})
+      push_playing_track_scroll_event(socket)
     else
       socket
     end
+  end
+
+  # Unconditionally pushes `scroll_to_playing_track` event to client JS.
+  @spec push_playing_track_scroll_event_if_needed(Socket.t()) :: Socket.t()
+  def push_playing_track_scroll_event(socket) do
+    playing_track_idx = State.get_playing_track_idx(socket.assigns.state)
+
+    push_event(socket, "scroll_to_playing_track", %{track_idx: playing_track_idx})
   end
 end

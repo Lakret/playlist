@@ -3,7 +3,7 @@
   width: 80%;
   height: 0.5rem;
 
-  background-color: $track-position-background;
+  background-color: $color-white;
 
   cursor: pointer;
 }
@@ -13,7 +13,6 @@
 }
 
 .track-position__filler {
-  // width: 70%;
   height: 100%;
 
   background-color: $track-position-filler;

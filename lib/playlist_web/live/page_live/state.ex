@@ -4,13 +4,14 @@ defmodule PlaylistWeb.PageLive.State do
   """
   alias PlaylistWeb.PageLive.Track
 
-  defstruct ~w(playing_idx play_position_secs paused_idx queue)a
+  defstruct ~w(playing_idx play_position_secs paused_idx queue grouping)a
 
   @type t :: %__MODULE__{
           playing_idx: non_neg_integer() | nil,
           play_position_secs: non_neg_integer() | nil,
           paused_idx: non_neg_integer() | nil,
-          queue: [Track.t()]
+          queue: [Track.t()],
+          grouping: :album | nil
         }
 
   @doc """

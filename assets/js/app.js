@@ -27,8 +27,6 @@ Hooks.ScrollToTrack = {
     })
 
     this.el.addEventListener("scroll", (e) => {
-      console.log(`scroll: ${JSON.stringify(e)}`)
-
       this.pushEvent("playlist_scroll_detected")
     })
   }

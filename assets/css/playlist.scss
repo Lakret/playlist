@@ -5,12 +5,22 @@
   justify-content: start;
   align-items: center;
 
-  width: 55rem;
-  height: 30rem;
+  width: $playlist-width;
+  height: $playlist-height;
 
   overflow: auto;
 
   box-shadow: 2px 2px 0 0 $shadow-color;
+
+  background-color: $color-white;
+}
+
+.playlist__group_header {
+  padding: 1rem 1rem;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .track {
@@ -31,30 +41,22 @@
 .track__play {
   font-size: 1.5rem;
   font-weight: 800;
-
-  // border: 1px solid black;
-  // border-radius: 20rem;
 }
 
 .track__title {
-  width: 20rem;
-
-  // background-color: lightyellow;
-  // border: 1px solid black;
+  width: $track-title-width;
 }
 
 .track__artist {
-  width: 10rem;
-  // background-color: pink;
+  width: $track-artist-width;
 }
 
 .track__album {
-  width: 10rem;
-  // background-color: lightseagreen;
+  width: $track-album-width;
 }
 
 .track__length {
-  width: 7rem;
+  width: $track-length-width;
 
   display: flex;
   justify-content: flex-end;
